@@ -2,8 +2,8 @@
 
 paddle::paddle()
 {
-	setSize(sf::Vector2f(20, 80));
-	speed = 400;
+	setSize(sf::Vector2f(3, 100));
+	speed = 500;
 	isUp = 0; 
 	isDown = 0;
 }

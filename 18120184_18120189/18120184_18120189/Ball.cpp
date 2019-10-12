@@ -3,9 +3,10 @@
 Ball::Ball()
 {
 	setRadius(10);
+	setOrigin(getRadius(), getRadius());
 	setFillColor(sf::Color::Red);
 	speed = 400;
-	angle = -2*PI/3;
+	angle = -PI;
 }
 
 
@@ -21,4 +22,8 @@ float Ball::getSpeed()
 
 void Ball::setAngle(float a) {
 	angle = a;
+}
+
+void Ball::setSpeed(float s) {
+  speed = s;
 }

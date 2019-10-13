@@ -1,6 +1,5 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <iostream>
 #include <cmath>
 #include <string>
 #include <ctime>
@@ -11,11 +10,15 @@ const int HEIGHT = 480;
 const int WIDTH = 640;
 const int WALL_THICKNESS = 20;
 const sf::Time TimePerFrame = sf::seconds(1.f / 144.f);
+const sf::Time DelayTime = sf::seconds(1);
+const int finishPoint = 10;
 
 class Game
 {
 private:
-	bool flag = true;
+  sf::Clock c;
+	bool flag = false;
+	sf::Text instruct;
 	sf::Text tPointP1;
 	sf::Text tPointP2;
 	sf::Text text;
@@ -28,6 +31,7 @@ private:
 	paddle p2;
 	sf::RenderWindow window;
 	Ball ball;
+	bool isPause;
 private:
 	void processEvents();
 	void update(sf::Time dt);
@@ -40,7 +44,9 @@ public:
 	bool isCollisionWithWalls();
 	void updatePlayerMovement(sf::Time dt);
 	void updateBallMovement(sf::Time dt);
-	void displayGameFinish();
+	void countPoint();
+	bool checkFinish();
+	void convertToText();
 	void resetStat(sf::Time dt);
 	void run();
 	void handleInput(sf::Keyboard::Key k, bool isPressed);

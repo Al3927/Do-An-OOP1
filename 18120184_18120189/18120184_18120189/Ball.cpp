@@ -4,7 +4,7 @@ Ball::Ball()
 {
 	setRadius(10);
 	setOrigin(getRadius(), getRadius());
-	setFillColor(sf::Color::Red);
+	setFillColor(sf::Color::White);
 	speed = 400;
 	angle = -PI;
 }

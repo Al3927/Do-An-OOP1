@@ -19,28 +19,32 @@ void Game::processEvents() {
 
 void Game::update(sf::Time dt) {
   if (isOver()) {
-	displayGameFinish();
+	countPoint();
+	if(!checkFinish())
+	  resetStat(dt);
   }
   else {
-	updatePlayerMovement(dt);
-	updateBallMovement(dt);
+	  updatePlayerMovement(dt);
+	  updateBallMovement(dt);
   }
 }
 
 void Game::render() {
-  window.clear();
-  window.draw(upperWall);
-  window.draw(lowerWall);
-  window.draw(ball);
-  window.draw(p1);
-  window.draw(p2);
-  window.draw(text);
-  window.draw(tPointP1);
-  window.draw(tPointP2);
-  window.display();
+	window.clear();
+	window.draw(text);
+	window.draw(instruct);
+	window.draw(upperWall);
+	window.draw(lowerWall);
+	window.draw(ball);
+	window.draw(p1);
+	window.draw(p2);
+	window.draw(tPointP1);
+	window.draw(tPointP2);
+	window.display();
 }
 
 Game::Game() {
+  isPause = 0;
   srand(time(NULL));
   font.loadFromFile("arial.ttf");
   tPointP1.setFont(font);
@@ -49,7 +53,12 @@ Game::Game() {
   tPointP1.setString("0");
   tPointP2.setString("0");
   text.setString("");  
-  text.setCharacterSize(40);
+  instruct.setString("Score 10 points first to win");
+  instruct.setFillColor(sf::Color::White);
+  instruct.setFont(font);
+  instruct.setCharacterSize(20);
+  instruct.setPosition(200, 50);
+  text.setCharacterSize(30);
   tPointP1.setCharacterSize(30);
   tPointP2.setCharacterSize(30);
   text.setFillColor(sf::Color::Red);
@@ -143,38 +152,54 @@ void Game::updateBallMovement(sf::Time dt) {
   ball.move(ballMovement * dt.asSeconds());
 }
 
-void Game::displayGameFinish() {
-  if (text.getString() == "") {
-	if (isOver() == -1)
-	  pointP1++;
-	if (isOver() == 1)
-	  pointP2++;
-	std::string s1;
-	std::string s2;
-	s1 = std::to_string(pointP1);
-	s2 = std::to_string(pointP2);
-	tPointP1.setString(s1);
-	tPointP2.setString(s2);
-	text.setString("Enter to continue!");
+void Game::countPoint() {
+  if (!flag) {
+	  if (isOver() == -1)
+		pointP1++;
+	  if (isOver() == 1)
+		pointP2++;
+	  c.restart();
+	flag = true;
+	convertToText();
   }
 }
 
+bool Game::checkFinish() {
+  if (pointP1 == finishPoint || pointP2 == finishPoint) {
+	if (pointP1 == finishPoint)
+	  text.setString("P1 wins, Enter to play again");
+	else
+	  text.setString("P2 wins, Enter to play again");
+	return true;
+  }
+  return false;
+}
+
+void Game::convertToText() {
+  std::string s1;
+  std::string s2;
+  s1 = std::to_string(pointP1);
+  s2 = std::to_string(pointP2);
+  tPointP1.setString(s1);
+  tPointP2.setString(s2);
+}
+
 void Game::resetStat(sf::Time dt) {
-  text.setString("");
-  float newAngle = 0;
-
-  if (isOver() == -1)
-	newAngle = (float)(rand() % 1100) / 1000;
-  if (isOver() == 1)
-	newAngle = (float)(rand() % 1100) / 1000 + PI / 2 + 0.3;
-  ball.setSpeed(400);
-
-  ball.setPosition(WIDTH / 2, HEIGHT / 2);
-  sf::Vector2f ballMovement(0, 0);
-  ball.setAngle(newAngle);
-  sf::Vector2f direction(cos(ball.getAngle()), sin(ball.getAngle()));
-  ballMovement += direction * ball.getSpeed();
-  ball.move(ballMovement * dt.asSeconds());
+  if (c.getElapsedTime() >= DelayTime) {
+	flag = false;
+	float newAngle = 0;
+	if (isOver() == -1)
+	  newAngle = (float)(rand() % 1100) / 1000;
+	if (isOver() == 1)
+	  newAngle = (PI - (float)(rand() % 1100) / 1000);
+	ball.setSpeed(400);
+	ball.setPosition(WIDTH / 2, HEIGHT / 2);
+	sf::Vector2f ballMovement(0, 0);
+	ball.setAngle(newAngle);
+	sf::Vector2f direction(cos(ball.getAngle()), sin(ball.getAngle()));
+	ballMovement += direction * ball.getSpeed();
+	ball.move(ballMovement * dt.asSeconds());
+  }
 }
 
 void Game::run() {
@@ -186,7 +211,8 @@ void Game::run() {
 	while (timeSinceLastUpdate > TimePerFrame) {
 	  timeSinceLastUpdate -= TimePerFrame;
 	  processEvents();
-	  update(TimePerFrame);
+	  if (!isPause && !checkFinish())
+		update(TimePerFrame);
 	}
 	render();
   }
@@ -201,6 +227,18 @@ void Game::handleInput(sf::Keyboard::Key k, bool isPressed) {
 	p2.setIsUp(isPressed);
   if (k == sf::Keyboard::Down)
 	p2.setIsDown(isPressed);
-  if (k == sf::Keyboard::Enter && isOver())
+  if (k == sf::Keyboard::Escape && isPressed && !checkFinish()) {
+	if (isPause == 1)
+	  text.setString("");
+	else
+	  text.setString("PAUSED");
+	isPause = 1 - isPause;
+  }
+  if (k == sf::Keyboard::Enter && isPressed && checkFinish()) {
+	text.setString("");
 	resetStat(TimePerFrame);
+	pointP1 = 0;
+	pointP2 = 0;
+	convertToText();
+  }
 }

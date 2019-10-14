@@ -38,6 +38,7 @@ private:
 	void render();
 public:
 	Game();
+	~Game();
 	int isOver();
 	bool isCollisionWithP1();
 	bool isCollisionWithP2();

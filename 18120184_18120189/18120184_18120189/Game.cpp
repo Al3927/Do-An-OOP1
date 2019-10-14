@@ -84,6 +84,8 @@ Game::Game() {
   lowerWall.setFillColor(sf::Color::Cyan);
 }
 
+Game::~Game() = default;
+
 int Game::isOver() {
   if (ball.getPosition().x + ball.getRadius() <= 0)
 	return 1;

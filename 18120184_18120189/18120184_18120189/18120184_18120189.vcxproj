@@ -130,11 +130,17 @@
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="menu\audio.cpp" />
+    <ClCompile Include="menu\color.cpp" />
     <ClCompile Include="paddle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ball.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Menu.h" />
+    <ClInclude Include="menu\audio.hpp" />
+    <ClInclude Include="menu\color.hpp" />
     <ClInclude Include="paddle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

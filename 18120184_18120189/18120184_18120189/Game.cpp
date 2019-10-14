@@ -3,7 +3,7 @@
 void Game::processEvents() {
   sf::Event e;
   while (window.pollEvent(e)) {
-	switch (e.type) {
+	switch (e.type) {  
 	  case sf::Event::Closed:
 		window.close();
 		break;
@@ -83,6 +83,8 @@ Game::Game() {
   lowerWall.setPosition(0, HEIGHT - WALL_THICKNESS);
   lowerWall.setFillColor(sf::Color::Cyan);
 }
+
+Game::~Game() = default;
 
 int Game::isOver() {
   if (ball.getPosition().x + ball.getRadius() <= 0)

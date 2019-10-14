@@ -7,11 +7,11 @@
 #include "paddle.h"
 
 const int HEIGHT = 480;
-const int WIDTH = 640;
+const int WIDTH = 720;
 const int WALL_THICKNESS = 20;
 const sf::Time TimePerFrame = sf::seconds(1.f / 144.f);
 const sf::Time DelayTime = sf::seconds(1);
-const int finishPoint = 10;
+const int finishPoint = 1;
 
 class Game
 {

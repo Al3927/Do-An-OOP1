@@ -46,7 +46,7 @@ void Game::render() {
 Game::Game() {
   isPause = 0;
   srand(time(NULL));
-  font.loadFromFile("arial.ttf");
+  font.loadFromFile("VCR_OSD_MONO_1.001.ttf");
   tPointP1.setFont(font);
   tPointP2.setFont(font);
   text.setFont(font);
@@ -56,17 +56,17 @@ Game::Game() {
   instruct.setString("Score 10 points first to win");
   instruct.setFillColor(sf::Color::White);
   instruct.setFont(font);
-  instruct.setCharacterSize(20);
-  instruct.setPosition(200, 50);
+  instruct.setCharacterSize(25);
+  instruct.setPosition(150, 50);
   text.setCharacterSize(30);
-  tPointP1.setCharacterSize(30);
-  tPointP2.setCharacterSize(30);
+  tPointP1.setCharacterSize(35);
+  tPointP2.setCharacterSize(35);
   text.setFillColor(sf::Color::Red);
   tPointP1.setFillColor(sf::Color::Red);
   tPointP2.setFillColor(sf::Color::Red);
   text.setPosition(150, 200);
   tPointP1.setPosition(50, 50);
-  tPointP2.setPosition(560, 50);
+  tPointP2.setPosition(650, 50);
 
   pointP1 = 0;
   pointP2 = 0;
@@ -94,13 +94,13 @@ int Game::isOver() {
 
 bool Game::isCollisionWithP1() {
   return (ball.getPosition().x - ball.getRadius() <= p1.getPosition().x + p1.getSize().x &&
-		  //ball.getPosition().x - ball.getRadius() >= p1.getPosition().x &&
+		  ball.getPosition().x - ball.getRadius() >= p1.getPosition().x &&
 		  ball.getPosition().y >= p1.getPosition().y &&
 		  ball.getPosition().y <= p1.getPosition().y + p1.getSize().y);
 }
 
 bool Game::isCollisionWithP2() {
-  return (//ball.getPosition().x + ball.getRadius() <= p2.getPosition().x + p2.getSize().x &&
+  return (ball.getPosition().x + ball.getRadius() <= p2.getPosition().x + p2.getSize().x &&
 		  ball.getPosition().x + ball.getRadius() >= p2.getPosition().x &&
 		  ball.getPosition().y >= p2.getPosition().y &&
 		  ball.getPosition().y <= p2.getPosition().y + p2.getSize().y);

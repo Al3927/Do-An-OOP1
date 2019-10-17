@@ -130,6 +130,7 @@
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="paddle.cpp" />
     <ClCompile Include="State.cpp" />
@@ -139,6 +140,7 @@
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Ball.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="paddle.h" />
     <ClInclude Include="State.hpp" />
     <ClInclude Include="StateMachine.h" />

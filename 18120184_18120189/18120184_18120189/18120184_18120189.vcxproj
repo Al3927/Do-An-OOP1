@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application.cpp" />
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -137,6 +138,7 @@
     <ClCompile Include="StateMachine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Ball.h" />
     <ClInclude Include="Game.h" />

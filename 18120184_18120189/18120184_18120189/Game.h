@@ -3,9 +3,11 @@
 #include <cmath>
 #include <string>
 #include <ctime>
+#include <iostream>
 #include "Ball.h"
 #include "paddle.h"
 
+using namespace std;
 const int HEIGHT = 480;
 const int WIDTH = 720;
 const int WALL_THICKNESS = 20;
@@ -40,8 +42,8 @@ public:
 	Game();
 	~Game();
 	int isOver();
-	bool isCollisionWithP1();
-	bool isCollisionWithP2();
+	int isCollisionWithP1();
+	int isCollisionWithP2();
 	bool isCollisionWithWalls();
 	void updatePlayerMovement(sf::Time dt);
 	void updateBallMovement(sf::Time dt);

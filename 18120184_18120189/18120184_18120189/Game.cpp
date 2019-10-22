@@ -94,18 +94,64 @@ int Game::isOver() {
   else return 0;
 }
 
-bool Game::isCollisionWithP1() {
-  return (ball.getPosition().x - ball.getRadius() <= p1.getPosition().x + p1.getSize().x &&
-		  ball.getPosition().x - ball.getRadius() >= p1.getPosition().x &&
-		  ball.getPosition().y >= p1.getPosition().y &&
-		  ball.getPosition().y <= p1.getPosition().y + p1.getSize().y);
+int Game::isCollisionWithP1() {
+  if (ball.getPosition().x - ball.getRadius() <= p1.getPosition().x + p1.getSize().x &&
+	  ball.getPosition().x - ball.getRadius() >= p1.getPosition().x &&
+	  ball.getPosition().y >= p1.getPosition().y &&
+	  ball.getPosition().y <= p1.getPosition().y + p1.getSize().y)
+	return 1;
+  else
+	if (ball.getPosition().x >= p1.getPosition().x + p1.getSize().x &&
+		ball.getPosition().y <= p1.getPosition().y &&
+		sqrt((p1.getPosition().x + p1.getSize().x - ball.getPosition().x) * (p1.getPosition().x + p1.getSize().x - ball.getPosition().x) +
+		(ball.getPosition().y - p1.getPosition().y) * (ball.getPosition().y - p1.getPosition().y)) <= ball.getRadius())
+	  return 2;
+
+	else if (ball.getPosition().x >= p1.getPosition().x + p1.getSize().x &&
+	  ball.getPosition().y >= p1.getPosition().y + p1.getSize().y &&
+	  sqrt((p1.getPosition().x + p1.getSize().x - ball.getPosition().x) * (p1.getPosition().x + p1.getSize().x - ball.getPosition().x) +
+	  (ball.getPosition().y - (p1.getPosition().y + p1.getSize().y)) * (ball.getPosition().y - (p1.getPosition().y + p1.getSize().y))) <= ball.getRadius())
+	return 2;
+
+  else if (ball.getPosition().x <= p1.getPosition().x + p1.getSize().x &&
+	  ball.getPosition().x >= p1.getPosition().x &&
+	  ((ball.getPosition().y + ball.getRadius() >= p1.getPosition().y &&
+	   ball.getPosition().y + ball.getRadius() <= p1.getPosition().y + p1.getSize().x) ||
+	  (ball.getPosition().y - ball.getRadius() <= p1.getPosition().y + p1.getSize().y &&
+	  ball.getPosition().y - ball.getRadius() >= p1.getPosition().y + p1.getSize().y - p1.getSize().x)))
+	return 3;
+  else
+  return 0;
 }
 
-bool Game::isCollisionWithP2() {
-  return (ball.getPosition().x + ball.getRadius() <= p2.getPosition().x + p2.getSize().x &&
-		  ball.getPosition().x + ball.getRadius() >= p2.getPosition().x &&
-		  ball.getPosition().y >= p2.getPosition().y &&
-		  ball.getPosition().y <= p2.getPosition().y + p2.getSize().y);
+int Game::isCollisionWithP2() {
+  if (ball.getPosition().x + ball.getRadius() <= p2.getPosition().x + p2.getSize().x &&
+	  ball.getPosition().x + ball.getRadius() >= p2.getPosition().x &&
+	  ball.getPosition().y >= p2.getPosition().y &&
+	  ball.getPosition().y <= p2.getPosition().y + p2.getSize().y)
+	return 1;
+  else
+	if (ball.getPosition().x <= p2.getPosition().x &&
+		ball.getPosition().y <= p2.getPosition().y &&
+		sqrt((p2.getPosition().x - ball.getPosition().x) * (p2.getPosition().x - ball.getPosition().x) +
+		(ball.getPosition().y - p2.getPosition().y) * (ball.getPosition().y - p2.getPosition().y)) <= ball.getRadius())
+	  return 2;
+
+	else if (ball.getPosition().x <= p2.getPosition().x &&
+			 ball.getPosition().y >= p2.getPosition().y + p2.getSize().y &&
+			 sqrt((p2.getPosition().x - ball.getPosition().x) * (p2.getPosition().x - ball.getPosition().x) +
+			 (ball.getPosition().y - (p2.getPosition().y + p2.getSize().y)) * (ball.getPosition().y - (p2.getPosition().y + p2.getSize().y))) <= ball.getRadius())
+	  return 2;
+
+	else if (ball.getPosition().x <= p2.getPosition().x + p2.getSize().x &&
+			 ball.getPosition().x >= p2.getPosition().x &&
+			 ((ball.getPosition().y + ball.getRadius() >= p2.getPosition().y &&
+			   ball.getPosition().y + ball.getRadius() <= p2.getPosition().y + p2.getSize().x) ||
+			   (ball.getPosition().y - ball.getRadius() <= p2.getPosition().y + p2.getSize().y &&
+				ball.getPosition().y - ball.getRadius() >= p2.getPosition().y + p2.getSize().y - p2.getSize().x)))
+	  return 3;
+	else
+	  return 0;
 }
 
 bool Game::isCollisionWithWalls() {
@@ -133,20 +179,41 @@ void Game::updateBallMovement(sf::Time dt) {
   float newAngle = phi;
   if (isCollisionWithWalls()) 
 	newAngle = -phi;
-  if (isCollisionWithP1()) {
+  int P1Collision = isCollisionWithP1();
+  int P2Collision = isCollisionWithP2();
+  if (P1Collision == 1) {
 	if (phi > 0)
 	  newAngle = (float)(rand() % 1100) / 1000;
 	else
 	  newAngle = -(float)(rand() % 1100) / 1000;
 	ball.setSpeed(ball.getSpeed()*1.1);
   }
-	
-  if (isCollisionWithP2()) {
+  if (P1Collision == 2) {
+	if (phi > 0)
+	  newAngle = -(float)(rand() % 1100) / 1000;
+	else
+	  newAngle = (float)(rand() % 1100) / 1000;
+	ball.setSpeed(ball.getSpeed() * 1.1);
+  }
+  if (P1Collision == 3) {
+	newAngle = -phi;
+  }
+  if (P2Collision == 1) {
 	if (phi > 0)
 	  newAngle = (PI - (float)(rand() % 1100) / 1000);
 	else
 	  newAngle = -(PI - (float)(rand() % 1100) / 1000);
-	ball.setSpeed(ball.getSpeed()*1.1);
+	ball.setSpeed(ball.getSpeed() * 1.1);
+  }
+  if (P2Collision == 2) {
+	if (phi > 0)
+	  newAngle = -(PI - (float)(rand() % 1100) / 1000);
+	else
+	  newAngle = (PI - (float)(rand() % 1100) / 1000);
+	ball.setSpeed(ball.getSpeed() * 1.1);
+  }
+  if (P2Collision == 3) {
+	newAngle = -phi;
   }
   ball.setAngle(newAngle);
   sf::Vector2f direction(cos(ball.getAngle()), sin(ball.getAngle()));

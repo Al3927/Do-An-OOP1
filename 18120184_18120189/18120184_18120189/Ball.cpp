@@ -5,8 +5,8 @@ Ball::Ball()
 	setRadius(10);
 	setOrigin(getRadius(), getRadius());
 	setFillColor(sf::Color::White);
-	speed = 400;
-	angle = -PI;
+	speed = 200;
+	angle = 0;
 }
 
 

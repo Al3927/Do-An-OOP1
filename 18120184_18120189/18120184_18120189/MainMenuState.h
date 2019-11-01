@@ -2,8 +2,7 @@
 #define MAINMENUSTATE_H
 
 #include "GameState.h"
-
-//#include "SettingsState.h"
+#include "GameSingleState.h"
 #include "Gui.h"
 
 class MainMenuState :

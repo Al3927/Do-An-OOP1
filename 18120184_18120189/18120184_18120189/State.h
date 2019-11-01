@@ -49,6 +49,7 @@ protected:
 	virtual void initKeybinds() = 0;
 
 public:
+	State();
 	State(StateData* state_data);
 	virtual ~State();
 

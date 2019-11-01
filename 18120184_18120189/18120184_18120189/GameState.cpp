@@ -182,6 +182,10 @@ void GameState::updatePlayerInput()
 	}*/
 }
 
+GameState::GameState()
+{
+}
+
 //Constructors / Destructors
 GameState::GameState(StateData* state_data)
 	: State(state_data)
@@ -450,11 +454,11 @@ void GameState::updatePlayerMovement(const float& dt)
 	sf::Vector2f p2Movement(0, 0);
 	if (p1.getIsUp() && p1.getPosition().y >= WALL_THICKNESS)
 		p1Movement.y -= p1.getSpeed();
-	if (p1.getIsDown() && p1.getPosition().y <= HEIGHT - p1.getSize().y - WALL_THICKNESS)
+	if (p1.getIsDown() && p1.getPosition().y <= this->stateData->gfxSettings->resolution.height - p1.getSize().y - WALL_THICKNESS)
 		p1Movement.y += p1.getSpeed();
 	if (p2.getIsUp() && p2.getPosition().y >= WALL_THICKNESS)
 		p2Movement.y -= p2.getSpeed();
-	if (p2.getIsDown() && p2.getPosition().y <= HEIGHT - p1.getSize().y - WALL_THICKNESS)
+	if (p2.getIsDown() && p2.getPosition().y <= this->stateData->gfxSettings->resolution.height - p1.getSize().y - WALL_THICKNESS)
 		p2Movement.y += p2.getSpeed();
 	p1.move(p1Movement * dt);
 	p2.move(p2Movement * dt);

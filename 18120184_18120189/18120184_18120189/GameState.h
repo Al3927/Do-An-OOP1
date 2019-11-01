@@ -26,7 +26,7 @@ const int finishPoint = 10;
 class GameState :
 	public State
 {
-private:
+protected:
 	//Tran Dang Khoa
 	sf::Clock c;
 	bool flag = false;
@@ -79,18 +79,19 @@ public:
 	int isCollisionWithP1();
 	int isCollisionWithP2();
 	bool isCollisionWithWalls();
-	void updatePlayerMovement(const float& dt);
+	virtual void updatePlayerMovement(const float& dt);
 	void updateBallMovement(const float& dt);
 	void countPoint();
 	bool checkFinish();
 	void convertToText();
 	void resetStat(const float& dt);
 
-	void handleInput(sf::Keyboard::Key k, bool isPressed);
+	virtual void handleInput(sf::Keyboard::Key k, bool isPressed);
 
 	//
 	void updatePlayerInput();
 	//
+	GameState();
 	GameState(StateData* state_data);
 	virtual ~GameState();
 
@@ -99,7 +100,7 @@ public:
 	void saveGame(const std::string path);
 	void updateInput(const float& dt);
 
-	void updatePauseMenuButtons();
+	virtual void updatePauseMenuButtons();
 
 
 	void update(const float& dt);

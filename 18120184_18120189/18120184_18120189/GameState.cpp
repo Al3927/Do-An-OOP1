@@ -78,14 +78,14 @@ void GameState::initvari()
 	instruct.setFillColor(sf::Color::White);
 	instruct.setFont(font);
 	instruct.setCharacterSize(25);
-	instruct.setPosition(150, 50);
+	instruct.setPosition(245, 50);
 	text.setCharacterSize(30);
 	tPointP1.setCharacterSize(35);
 	tPointP2.setCharacterSize(35);
 	text.setFillColor(sf::Color::Red);
 	tPointP1.setFillColor(sf::Color::Red);
 	tPointP2.setFillColor(sf::Color::Red);
-	text.setPosition(150, 200);
+	text.setPosition(220, 200);
 	tPointP1.setPosition(50, 50);
 	tPointP2.setPosition(650, 50);
 
@@ -114,7 +114,7 @@ void GameState::initPauseMenu()
 	const sf::VideoMode& vm = this->stateData->gfxSettings->resolution;
 	this->pmenu = new PauseMenu(this->stateData->gfxSettings->resolution, this->font);
 
-	this->pmenu->addButton("QUIT", gui::p2pY(74.f, vm), gui::p2pX(13.f, vm), gui::p2pY(6.f, vm), gui::calcCharSize(vm), "Quit");
+	this->pmenu->addButton("QUIT", gui::p2pY(74.f, vm), gui::p2pX(13.f, vm), gui::p2pY(6.f, vm), gui::calcCharSize(vm), "Return to menu");
 	this->pmenu->addButton("SAVE_CASE_1", gui::p2pY(30.f, vm), gui::p2pX(13.f, vm), gui::p2pY(6.f, vm), gui::calcCharSize(vm), "Save Case 1");
 	this->pmenu->addButton("SAVE_CASE_2", gui::p2pY(35.f, vm), gui::p2pX(13.f, vm), gui::p2pY(6.f, vm), gui::calcCharSize(vm), "Save Case 2");
 	this->pmenu->addButton("SAVE_CASE_3", gui::p2pY(40.f, vm), gui::p2pX(13.f, vm), gui::p2pY(6.f, vm), gui::calcCharSize(vm), "Save Case 3");
@@ -220,8 +220,10 @@ void GameState::loadGame(const std::string path)
 	if (ifs.is_open())
 	{
 		sf::Vector2f b_pos;
-		ifs >> b_pos.x >> b_pos.y;
+		float angle;
+		ifs >> b_pos.x >> b_pos.y >> angle;
 		ball.setPosition(b_pos);
+		ball.setAngle(angle);
 
 		sf::Vector2f p1_pos = p1.getPosition();
 		ifs >> p1_pos.x >> p1_pos.y;
@@ -231,6 +233,8 @@ void GameState::loadGame(const std::string path)
 		p2.setPosition(p2_pos);
 		ifs >> pointP1;
 		ifs >> pointP2;
+		convertToText();
+		flag = false;
 	}
 
 	ifs.close();
@@ -245,7 +249,7 @@ void GameState::saveGame(const std::string path)
 	if (ifs.is_open())
 	{
 		sf::Vector2f b_pos = ball.getPosition();
-		ifs << b_pos.x << " " << b_pos.y << "\n";
+		ifs << b_pos.x << " " << b_pos.y << " " << ball.getAngle() << "\n";
 		sf::Vector2f p1_pos = p1.getPosition();
 		ifs << p1_pos.x << " " << p1_pos.y << "\n";
 		sf::Vector2f p2_pos = p2.getPosition();
@@ -464,32 +468,52 @@ void GameState::updatePlayerMovement(const float& dt)
 	p2.move(p2Movement * dt);
 }
 
-void GameState::updateBallMovement(const float& dt)
-{
-	sf::Vector2f ballMovement(0, 0);
-	float phi = ball.getAngle();
-	float newAngle = phi;
-	if (isCollisionWithWalls())
-		newAngle = -phi;
-	if (isCollisionWithP1()) {
-		if (phi > 0)
-			newAngle = (float)(rand() % 1100) / 1000;
-		else
-			newAngle = -(float)(rand() % 1100) / 1000;
-		ball.setSpeed(ball.getSpeed() * 1.1);
-	}
-
-	if (isCollisionWithP2()) {
-		if (phi > 0)
-			newAngle = (PI - (float)(rand() % 1100) / 1000);
-		else
-			newAngle = -(PI - (float)(rand() % 1100) / 1000);
-		ball.setSpeed(ball.getSpeed() * 1.1);
-	}
-	ball.setAngle(newAngle);
-	sf::Vector2f direction(cos(ball.getAngle()), sin(ball.getAngle()));
-	ballMovement += direction * ball.getSpeed();
-	ball.move(ballMovement * dt);
+void GameState::updateBallMovement(const float& dt) {
+  sf::Vector2f ballMovement(0, 0);
+  float phi = ball.getAngle();
+  float newAngle = phi;
+  if (isCollisionWithWalls())
+	newAngle = -phi;
+  int P1Collision = isCollisionWithP1();
+  int P2Collision = isCollisionWithP2();
+  if (P1Collision == 1) {
+	if (phi > 0)
+	  newAngle = (float)(rand() % 1100) / 1000;
+	else
+	  newAngle = -(float)(rand() % 1100) / 1000;
+	ball.setSpeed(ball.getSpeed() * 1.1);
+  }
+  if (P1Collision == 2) {
+	if (phi > 0)
+	  newAngle = -(float)(rand() % 1100) / 1000;
+	else
+	  newAngle = (float)(rand() % 1100) / 1000;
+	ball.setSpeed(ball.getSpeed() * 1.1);
+  }
+  if (P1Collision == 3) {
+	newAngle = -phi;
+  }
+  if (P2Collision == 1) {
+	if (phi > 0)
+	  newAngle = (PI - (float)(rand() % 1100) / 1000);
+	else
+	  newAngle = -(PI - (float)(rand() % 1100) / 1000);
+	ball.setSpeed(ball.getSpeed() * 1.1);
+  }
+  if (P2Collision == 2) {
+	if (phi > 0)
+	  newAngle = -(PI - (float)(rand() % 1100) / 1000);
+	else
+	  newAngle = (PI - (float)(rand() % 1100) / 1000);
+	ball.setSpeed(ball.getSpeed() * 1.1);
+  }
+  if (P2Collision == 3) {
+	newAngle = -phi;
+  }
+  ball.setAngle(newAngle);
+  sf::Vector2f direction(cos(ball.getAngle()), sin(ball.getAngle()));
+  ballMovement += direction * ball.getSpeed();
+  ball.move(ballMovement * dt);
 }
 
 void GameState::countPoint()

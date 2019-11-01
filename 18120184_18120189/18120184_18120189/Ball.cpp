@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Ball.h"
 
 Ball::Ball()
@@ -5,8 +6,8 @@ Ball::Ball()
 	setRadius(10);
 	setOrigin(getRadius(), getRadius());
 	setFillColor(sf::Color::White);
-	speed = 200;
-	angle = 0;
+	speed = 400;
+	angle = -PI;
 }
 
 
@@ -25,5 +26,5 @@ void Ball::setAngle(float a) {
 }
 
 void Ball::setSpeed(float s) {
-  speed = s;
+	speed = s;
 }

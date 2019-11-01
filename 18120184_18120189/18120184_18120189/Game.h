@@ -1,57 +1,58 @@
-#pragma once
-#include <SFML/Graphics.hpp>
-#include <cmath>
-#include <string>
-#include <ctime>
-#include <iostream>
-#include "Ball.h"
-#include "paddle.h"
+#ifndef GAME_H
+#define GAME_H
 
-using namespace std;
-const int HEIGHT = 480;
-const int WIDTH = 720;
-const int WALL_THICKNESS = 20;
-const sf::Time TimePerFrame = sf::seconds(1.f / 144.f);
-const sf::Time DelayTime = sf::seconds(1);
-const int finishPoint = 10;
+#include "MainMenuState.h"
+
 
 class Game
 {
 private:
-  sf::Clock c;
-	bool flag = false;
-	sf::Text instruct;
-	sf::Text tPointP1;
-	sf::Text tPointP2;
-	sf::Text text;
-	sf::Font font;
-	int pointP1;
-	int pointP2;
-	sf::RectangleShape upperWall;
-	sf::RectangleShape lowerWall;
-	paddle p1;
-	paddle p2;
-	sf::RenderWindow window;
-	Ball ball;
-	bool isPause;
-private:
-	void processEvents();
-	void update(sf::Time dt);
-	void render();
+	
+
+	//Variables
+	GraphicsSettings gfxSettings;
+	StateData stateData;
+	sf::RenderWindow *window;
+	sf::Event sfEvent;
+
+	sf::Clock dtClock;
+	float dt;
+
+	std::stack<State*> states;
+
+	std::map<std::string, int> supportedKeys;
+
+	float gridSize;
+
+	//Initialization
+	void initVariables();
+	void initGraphicsSettings();
+	void initWindow();
+	void initKeys();
+	void initStateData();
+	void initStates();
+
 public:
+	//Constructors/Destructors
 	Game();
-	~Game();
-	int isOver();
-	int isCollisionWithP1();
-	int isCollisionWithP2();
-	bool isCollisionWithWalls();
-	void updatePlayerMovement(sf::Time dt);
-	void updateBallMovement(sf::Time dt);
-	void countPoint();
-	bool checkFinish();
-	void convertToText();
-	void resetStat(sf::Time dt);
+	virtual ~Game();
+
+	//Functions
+
+
+	//Regular
+	void endApplication();
+
+	//Update
+	void updateDt();
+	void updateSFMLEvents();
+	void update();
+
+	//Render
+	void render();
+
+	//Core
 	void run();
-	void handleInput(sf::Keyboard::Key k, bool isPressed);
 };
 
+#endif

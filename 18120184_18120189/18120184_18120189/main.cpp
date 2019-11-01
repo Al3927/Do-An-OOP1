@@ -1,10 +1,12 @@
-#include "Game.h"
-
-
+#include "stdafx.h"
+#include"Game.h"
 
 int main()
 {
-	Game g;
-	g.run();
-	return EXIT_SUCCESS;
+	Game game;
+
+	game.run();
+
+	//system("pause");
+	return 0;
 }

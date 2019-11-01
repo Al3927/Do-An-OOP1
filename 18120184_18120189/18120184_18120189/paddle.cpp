@@ -1,11 +1,16 @@
+#include "stdafx.h"
 #include "paddle.h"
 
 paddle::paddle()
 {
 	setSize(sf::Vector2f(10, 100));
 	speed = 500;
-	isUp = 0; 
+	isUp = 0;
 	isDown = 0;
+}
+
+paddle::~paddle()
+{
 }
 
 void paddle::setIsUp(bool b)
@@ -32,3 +37,5 @@ float paddle::getSpeed()
 {
 	return speed;
 }
+
+

@@ -1,10 +1,10 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 const float PI = 3.1415f;
-class Ball : public sf::CircleShape 
+class Ball : public sf::CircleShape
 {
 private:
-	float angle;	
+	float angle;
 	float speed;
 public:
 	Ball();

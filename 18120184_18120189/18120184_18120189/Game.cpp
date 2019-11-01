@@ -1,313 +1,188 @@
+#include "stdafx.h"
 #include "Game.h"
 
-void Game::processEvents() {
-  sf::Event e;
-  while (window.pollEvent(e)) {
-	switch (e.type) {
-	  case sf::Event::Closed:
-		window.close();
-		break;
-	  case sf::Event::KeyPressed:
-		handleInput(e.key.code, true);
-		break;
-	  case sf::Event::KeyReleased:
-		handleInput(e.key.code, false);
-		break;
+//Tran DAng Khoa
+
+
+//Static functions
+
+//Initializer functions
+void Game::initVariables()
+{
+	this->window = NULL;
+
+	this->dt = 0.f;
+
+	this->gridSize = 64.f;
+
+}
+
+void Game::initGraphicsSettings()
+{
+	this->gfxSettings.loadFromFile("Config/graphics.ini");
+}
+
+void Game::initWindow()
+{
+	/*Creates a SFML window.*/
+
+	if(this->gfxSettings.fullscreen)
+		this->window = new sf::RenderWindow(
+			this->gfxSettings.resolution, 
+			this->gfxSettings.title, 
+			sf::Style::Fullscreen, 
+			this->gfxSettings.contextSettings);
+	else
+		this->window = new sf::RenderWindow(
+			this->gfxSettings.resolution,
+			this->gfxSettings.title,
+			sf::Style::Titlebar | sf::Style::Close, 
+			this->gfxSettings.contextSettings);
+
+	this->window->setFramerateLimit(this->gfxSettings.frameRateLimit);
+	this->window->setVerticalSyncEnabled(this->gfxSettings.verticalSync);
+}
+
+void Game::initKeys()
+{
+	std::ifstream ifs("Config/supported_keys.ini");
+
+	if (ifs.is_open())
+	{
+		std::string key = "";
+		int key_value = 0;
+		
+		while (ifs >> key >> key_value)
+		{
+			this->supportedKeys[key] = key_value;
+		}
 	}
-  }
+
+	ifs.close();
+
+//DEBUG REMOVE LATER!
+	for (auto i : this->supportedKeys)
+	{
+		std::cout << i.first << " " << i.second << "\n";
+	} 
 }
 
-void Game::update(sf::Time dt) {
-  if (isOver()) {
-	countPoint();
-	if(!checkFinish())
-	  resetStat(dt);
-  }
-  else {
-	  updatePlayerMovement(dt);
-	  updateBallMovement(dt);
-  }
+void Game::initStateData()
+{
+	this->stateData.window = this->window;
+	this->stateData.gfxSettings = &this->gfxSettings;
+	this->stateData.supportedKeys = &this->supportedKeys;
+	this->stateData.states = &this->states;
+	this->stateData.gridSize = this->gridSize;
 }
 
-void Game::render() {
-	window.clear();
-	window.draw(text);
-	window.draw(instruct);
-	window.draw(upperWall);
-	window.draw(lowerWall);
-	window.draw(ball);
-	window.draw(p1);
-	window.draw(p2);
-	window.draw(tPointP1);
-	window.draw(tPointP2);
-	window.display();
+void Game::initStates()
+{
+	this->states.push(new MainMenuState(&this->stateData));
 }
 
-Game::Game() {
-  isPause = 0;
-  srand(time(NULL));
-  font.loadFromFile("VCR_OSD_MONO_1.001.ttf");
-  tPointP1.setFont(font);
-  tPointP2.setFont(font);
-  text.setFont(font);
-  tPointP1.setString("0");
-  tPointP2.setString("0");
-  text.setString("");  
-  instruct.setString("Score 10 points first to win");
-  instruct.setFillColor(sf::Color::White);
-  instruct.setFont(font);
-  instruct.setCharacterSize(25);
-  instruct.setPosition(150, 50);
-  text.setCharacterSize(30);
-  tPointP1.setCharacterSize(35);
-  tPointP2.setCharacterSize(35);
-  text.setFillColor(sf::Color::Red);
-  tPointP1.setFillColor(sf::Color::Red);
-  tPointP2.setFillColor(sf::Color::Red);
-  text.setPosition(150, 200);
-  tPointP1.setPosition(50, 50);
-  tPointP2.setPosition(650, 50);
-
-  pointP1 = 0;
-  pointP2 = 0;
-  window.create(sf::VideoMode(WIDTH, HEIGHT), "Pong Game");
-  p1.setPosition(10, (HEIGHT - p1.getSize().y) / 2);
-  p1.setFillColor(sf::Color::Green);
-  p2.setPosition(WIDTH - (10 + p2.getSize().x), (HEIGHT - p2.getSize().y) / 2);
-  p2.setFillColor(sf::Color::Blue);
-  ball.setPosition(WIDTH / 2, HEIGHT / 2);
-  upperWall.setSize(sf::Vector2f(WIDTH, WALL_THICKNESS));
-  upperWall.setPosition(0, 0);
-  upperWall.setFillColor(sf::Color::Cyan);
-  lowerWall.setSize(sf::Vector2f(WIDTH, WALL_THICKNESS));
-  lowerWall.setPosition(0, HEIGHT - WALL_THICKNESS);
-  lowerWall.setFillColor(sf::Color::Cyan);
+//Constructors/Destructors
+Game::Game()
+{
+	this->initVariables();
+	this->initGraphicsSettings();
+	this->initWindow();
+	this->initKeys();
+	this->initStateData();
+	this->initStates();
 }
 
-Game::~Game() = default;
+Game::~Game()
+{
+	delete this->window;
 
-int Game::isOver() {
-  if (ball.getPosition().x + ball.getRadius() <= 0)
-	return 1;
-  if (ball.getPosition().x - ball.getRadius() > WIDTH)
-	return -1;
-  else return 0;
-}
-
-int Game::isCollisionWithP1() {
-  if (ball.getPosition().x - ball.getRadius() <= p1.getPosition().x + p1.getSize().x &&
-	  ball.getPosition().x - ball.getRadius() >= p1.getPosition().x &&
-	  ball.getPosition().y >= p1.getPosition().y &&
-	  ball.getPosition().y <= p1.getPosition().y + p1.getSize().y)
-	return 1;
-  else
-	if (ball.getPosition().x >= p1.getPosition().x + p1.getSize().x &&
-		ball.getPosition().y <= p1.getPosition().y &&
-		sqrt((p1.getPosition().x + p1.getSize().x - ball.getPosition().x) * (p1.getPosition().x + p1.getSize().x - ball.getPosition().x) +
-		(ball.getPosition().y - p1.getPosition().y) * (ball.getPosition().y - p1.getPosition().y)) <= ball.getRadius())
-	  return 2;
-
-	else if (ball.getPosition().x >= p1.getPosition().x + p1.getSize().x &&
-	  ball.getPosition().y >= p1.getPosition().y + p1.getSize().y &&
-	  sqrt((p1.getPosition().x + p1.getSize().x - ball.getPosition().x) * (p1.getPosition().x + p1.getSize().x - ball.getPosition().x) +
-	  (ball.getPosition().y - (p1.getPosition().y + p1.getSize().y)) * (ball.getPosition().y - (p1.getPosition().y + p1.getSize().y))) <= ball.getRadius())
-	return 2;
-
-  else if (ball.getPosition().x <= p1.getPosition().x + p1.getSize().x &&
-	  ball.getPosition().x >= p1.getPosition().x &&
-	  ((ball.getPosition().y + ball.getRadius() >= p1.getPosition().y &&
-	   ball.getPosition().y + ball.getRadius() <= p1.getPosition().y + p1.getSize().x) ||
-	  (ball.getPosition().y - ball.getRadius() <= p1.getPosition().y + p1.getSize().y &&
-	  ball.getPosition().y - ball.getRadius() >= p1.getPosition().y + p1.getSize().y - p1.getSize().x)))
-	return 3;
-  else
-  return 0;
-}
-
-int Game::isCollisionWithP2() {
-  if (ball.getPosition().x + ball.getRadius() <= p2.getPosition().x + p2.getSize().x &&
-	  ball.getPosition().x + ball.getRadius() >= p2.getPosition().x &&
-	  ball.getPosition().y >= p2.getPosition().y &&
-	  ball.getPosition().y <= p2.getPosition().y + p2.getSize().y)
-	return 1;
-  else
-	if (ball.getPosition().x <= p2.getPosition().x &&
-		ball.getPosition().y <= p2.getPosition().y &&
-		sqrt((p2.getPosition().x - ball.getPosition().x) * (p2.getPosition().x - ball.getPosition().x) +
-		(ball.getPosition().y - p2.getPosition().y) * (ball.getPosition().y - p2.getPosition().y)) <= ball.getRadius())
-	  return 2;
-
-	else if (ball.getPosition().x <= p2.getPosition().x &&
-			 ball.getPosition().y >= p2.getPosition().y + p2.getSize().y &&
-			 sqrt((p2.getPosition().x - ball.getPosition().x) * (p2.getPosition().x - ball.getPosition().x) +
-			 (ball.getPosition().y - (p2.getPosition().y + p2.getSize().y)) * (ball.getPosition().y - (p2.getPosition().y + p2.getSize().y))) <= ball.getRadius())
-	  return 2;
-
-	else if (ball.getPosition().x <= p2.getPosition().x + p2.getSize().x &&
-			 ball.getPosition().x >= p2.getPosition().x &&
-			 ((ball.getPosition().y + ball.getRadius() >= p2.getPosition().y &&
-			   ball.getPosition().y + ball.getRadius() <= p2.getPosition().y + p2.getSize().x) ||
-			   (ball.getPosition().y - ball.getRadius() <= p2.getPosition().y + p2.getSize().y &&
-				ball.getPosition().y - ball.getRadius() >= p2.getPosition().y + p2.getSize().y - p2.getSize().x)))
-	  return 3;
-	else
-	  return 0;
-}
-
-bool Game::isCollisionWithWalls() {
-  return (ball.getPosition().y - ball.getRadius() <= WALL_THICKNESS || ball.getPosition().y + ball.getRadius() >= HEIGHT - WALL_THICKNESS);
-}
-
-void Game::updatePlayerMovement(sf::Time dt) {
-  sf::Vector2f p1Movement(0, 0);
-  sf::Vector2f p2Movement(0, 0);
-  if (p1.getIsUp() && p1.getPosition().y >= WALL_THICKNESS)
-	p1Movement.y -= p1.getSpeed();
-  if (p1.getIsDown() && p1.getPosition().y <= HEIGHT - p1.getSize().y - WALL_THICKNESS)
-	p1Movement.y += p1.getSpeed();
-  if (p2.getIsUp() && p2.getPosition().y >= WALL_THICKNESS)
-	p2Movement.y -= p2.getSpeed();
-  if (p2.getIsDown() && p2.getPosition().y <= HEIGHT - p1.getSize().y - WALL_THICKNESS)
-	p2Movement.y += p2.getSpeed();
-  p1.move(p1Movement * dt.asSeconds());
-  p2.move(p2Movement * dt.asSeconds());
-}
-
-void Game::updateBallMovement(sf::Time dt) {
-  sf::Vector2f ballMovement(0, 0);
-  float phi = ball.getAngle();
-  float newAngle = phi;
-  if (isCollisionWithWalls()) 
-	newAngle = -phi;
-  int P1Collision = isCollisionWithP1();
-  int P2Collision = isCollisionWithP2();
-  if (P1Collision == 1) {
-	if (phi > 0)
-	  newAngle = (float)(rand() % 1100) / 1000;
-	else
-	  newAngle = -(float)(rand() % 1100) / 1000;
-	ball.setSpeed(ball.getSpeed()*1.1);
-  }
-  if (P1Collision == 2) {
-	if (phi > 0)
-	  newAngle = -(float)(rand() % 1100) / 1000;
-	else
-	  newAngle = (float)(rand() % 1100) / 1000;
-	ball.setSpeed(ball.getSpeed() * 1.1);
-  }
-  if (P1Collision == 3) {
-	newAngle = -phi;
-  }
-  if (P2Collision == 1) {
-	if (phi > 0)
-	  newAngle = (PI - (float)(rand() % 1100) / 1000);
-	else
-	  newAngle = -(PI - (float)(rand() % 1100) / 1000);
-	ball.setSpeed(ball.getSpeed() * 1.1);
-  }
-  if (P2Collision == 2) {
-	if (phi > 0)
-	  newAngle = -(PI - (float)(rand() % 1100) / 1000);
-	else
-	  newAngle = (PI - (float)(rand() % 1100) / 1000);
-	ball.setSpeed(ball.getSpeed() * 1.1);
-  }
-  if (P2Collision == 3) {
-	newAngle = -phi;
-  }
-  ball.setAngle(newAngle);
-  sf::Vector2f direction(cos(ball.getAngle()), sin(ball.getAngle()));
-  ballMovement += direction * ball.getSpeed();
-  ball.move(ballMovement * dt.asSeconds());
-}
-
-void Game::countPoint() {
-  if (!flag) {
-	  if (isOver() == -1)
-		pointP1++;
-	  if (isOver() == 1)
-		pointP2++;
-	  c.restart();
-	flag = true;
-	convertToText();
-  }
-}
-
-bool Game::checkFinish() {
-  if (pointP1 == finishPoint || pointP2 == finishPoint) {
-	if (pointP1 == finishPoint)
-	  text.setString("P1 wins, Enter to play again");
-	else
-	  text.setString("P2 wins, Enter to play again");
-	return true;
-  }
-  return false;
-}
-
-void Game::convertToText() {
-  std::string s1;
-  std::string s2;
-  s1 = std::to_string(pointP1);
-  s2 = std::to_string(pointP2);
-  tPointP1.setString(s1);
-  tPointP2.setString(s2);
-}
-
-void Game::resetStat(sf::Time dt) {
-  if (c.getElapsedTime() >= DelayTime) {
-	flag = false;
-	float newAngle = 0;
-	if (isOver() == -1)
-	  newAngle = (float)(rand() % 1100) / 1000;
-	if (isOver() == 1)
-	  newAngle = (PI - (float)(rand() % 1100) / 1000);
-	ball.setSpeed(400);
-	ball.setPosition(WIDTH / 2, HEIGHT / 2);
-	sf::Vector2f ballMovement(0, 0);
-	ball.setAngle(newAngle);
-	sf::Vector2f direction(cos(ball.getAngle()), sin(ball.getAngle()));
-	ballMovement += direction * ball.getSpeed();
-	ball.move(ballMovement * dt.asSeconds());
-  }
-}
-
-void Game::run() {
-  sf::Clock clock;
-  sf::Time timeSinceLastUpdate = sf::Time::Zero;
-  while (window.isOpen()) {
-	processEvents();
-	timeSinceLastUpdate += clock.restart();
-	while (timeSinceLastUpdate > TimePerFrame) {
-	  timeSinceLastUpdate -= TimePerFrame;
-	  processEvents();
-	  if (!isPause && !checkFinish())
-		update(TimePerFrame);
+	while (!this->states.empty())
+	{
+		delete this->states.top();
+		this->states.pop();
 	}
-	render();
-  }
 }
 
-void Game::handleInput(sf::Keyboard::Key k, bool isPressed) {
-  if (k == sf::Keyboard::W)
-	p1.setIsUp(isPressed);
-  if (k == sf::Keyboard::S)
-	p1.setIsDown(isPressed);
-  if (k == sf::Keyboard::Up)
-	p2.setIsUp(isPressed);
-  if (k == sf::Keyboard::Down)
-	p2.setIsDown(isPressed);
-  if (k == sf::Keyboard::Escape && isPressed && !checkFinish()) {
-	if (isPause == 1)
-	  text.setString("");
-	else
-	  text.setString("PAUSED");
-	isPause = 1 - isPause;
-  }
-  if (k == sf::Keyboard::Enter && isPressed && checkFinish()) {
-	text.setString("");
-	resetStat(TimePerFrame);
-	pointP1 = 0;
-	pointP2 = 0;
-	convertToText();
-  }
+//Functions
+void Game::endApplication()
+{
+	std::cout << "Ending Application!" << "\n";
 }
+
+void Game::updateDt()
+{
+	/*Updates the dt variable with the time it takes to update and render one frame.*/
+
+	this->dt = this->dtClock.restart().asSeconds();
+
+	
+	
+}
+
+void Game::updateSFMLEvents()
+{
+	//while (this->window->pollEvent(this->sfEvent))
+	//{
+	//	if (this->sfEvent.type == sf::Event::Closed)
+	//		this->window->close();
+	//}
+}
+
+
+
+void Game::update()
+{
+	this->updateSFMLEvents();
+
+	if (!this->states.empty())
+	{
+		if (this->window->hasFocus())
+		{
+			this->states.top()->update(this->dt);
+
+			if (this->states.top()->getQuit())
+			{
+				this->states.top()->endState();
+				delete this->states.top();
+				this->states.pop();
+			}
+		}
+	}
+	//Application end
+	else
+	{
+		this->endApplication();
+		this->window->close();
+	}
+}
+
+void Game::render()
+{
+	this->window->clear();
+
+	//Render items
+	if (!this->states.empty())
+		this->states.top()->render();
+
+	this->window->display();
+}
+
+void Game::run()
+{
+	//while (this->window->isOpen())
+	//{
+	//	this->updateDt();
+	//	this->update();
+	//	this->render();
+	//}
+	
+	while (window->isOpen()) 
+	{
+		//GameState::updateInput();
+		this->updateDt();
+		this->update();		
+		render();
+	}
+
+}
+
